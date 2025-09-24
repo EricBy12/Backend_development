@@ -7,9 +7,9 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\Product;
 
-use validator;
+use Validator;
 
-class ProductController
+class ProductController extends BaseController
 {
     public function index(): JsonResponse
     {
@@ -56,22 +56,17 @@ class ProductController
             return $this->sendError('Validation Error.', $validator->errors(), 422);
         }
 
-        $product = Product::find($id);
-        if (is_null($product)) {
-            return $this->sendError('Product not found.', [], 404);
-        }
+        $product->name = $input['name'];
+        $product->description = $input['description'];
+        $product->price = $input['price'];
+        $product->save();
 
-        $product->update($input);
         return $this->sendResponse($product, 'Product updated successfully.');
     }
 
-    public function destroy($id): JsonResponse
-    {
-        $product = Product::find($id);
-        if (is_null($product)) {
-            return $this->sendError('Product not found.', [], 404);
-        }
 
+    public function destroy(Product $product): JsonResponse
+    {
         $product->delete();
         return $this->sendResponse([], 'Product deleted successfully.');
     }
